@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/styles.css">
+  <script src="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/_ds_bundle.js"></script>
+  <style>body{margin:0;}</style>
+</helmet>
+<dc-import name="TopBar" variant="coach" active-nav="我的課程" member-name="陳建豪" branch-name="信義店" hint-size="100%,60px"></dc-import>
+<div style="max-width:1000px;margin:0 auto;padding:var(--space-8) var(--space-6);display:flex;flex-direction:column;gap:var(--space-6);font-family:var(--font-body);color:var(--color-text);box-sizing:border-box;">
+
+  <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end;">
+    <span style="font-size:11px;color:var(--color-neutral-500);">示範</span>
+    <div class="seg" style="font-size:12px;">
+      <label class="seg-opt"><input type="radio" name="hasCourses" checked="{{ hasCourses }}" onChange="{{ setHasCourses }}"></input>有課程</label>
+      <label class="seg-opt"><input type="radio" name="hasCourses" checked="{{ noCourses }}" onChange="{{ setNoCourses }}"></input>無課程</label>
+    </div>
+  </div>
+
+  <sc-if value="{{ reschedule }}" hint-placeholder-val="{{ false }}">
+    <section style="background:var(--color-neutral-50);border:1px solid var(--color-accent-300);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;flex-direction:column;gap:10px;">
+      <h2 style="margin:0;font-size:17px;">調課・{{ reschedule.title }}</h2>
+      <div class="field"><label style="font-size:12px;color:var(--color-neutral-500);">新開始時間</label><input class="input" type="datetime-local" value="{{ reschedule.newStart }}" onChange="{{ reschedule.onStartChange }}"></input></div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-primary" onClick="{{ reschedule.confirm }}">確認調課</button>
+        <button class="btn btn-ghost" onClick="{{ reschedule.cancel }}">取消</button>
+      </div>
+    </section>
+  </sc-if>
+
+  <section style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;flex-direction:column;gap:10px;">
+    <h2 style="margin:0;font-size:17px;">我的課程</h2>
+    <sc-if value="{{ hasCourses }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;">
+        <div style="display:grid;grid-template-columns:1.8fr 1fr 1.3fr 1fr 0.8fr 1.1fr 1.4fr;gap:var(--space-2);padding:var(--space-2);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 60%, transparent);border-bottom:1px solid var(--color-divider);min-width:860px;">
+          <span>課程</span><span>分店</span><span>開始時間</span><span>名額</span><span>候補</span><span>狀態</span><span>操作</span>
+        </div>
+        <sc-for list="{{ courses }}" as="c" hint-placeholder-count="4">
+          <div style="display:grid;grid-template-columns:1.8fr 1fr 1.3fr 1fr 0.8fr 1.1fr 1.4fr;gap:var(--space-2);align-items:center;padding:var(--space-2);font-size:14px;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);min-width:860px;">
+            <span>{{ c.title }}</span>
+            <span>{{ c.branch }}</span>
+            <span>{{ c.startTime }}</span>
+            <span>{{ c.seats }}</span>
+            <span>{{ c.waitlist }}</span>
+            <span class="{{ c.tagClass }}" style="{{ c.tagStyle }};display:inline-flex;padding:3px 10px;border-radius:calc(var(--radius-md)*0.75);font-size:11px;width:fit-content;">{{ c.statusLabel }}</span>
+            <span style="display:flex;gap:6px;">
+              <sc-if value="{{ c.schedulable }}" hint-placeholder-val="{{ false }}">
+                <button class="btn btn-secondary" style="padding:6px 10px;font-size:12px;" onClick="{{ c.onReschedule }}">調課</button>
+                <button class="btn btn-ghost" style="padding:6px 10px;font-size:12px;color:oklch(50% 0.16 25);" onClick="{{ c.onCancelCourse }}">停課</button>
+              </sc-if>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ noCourses }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:var(--space-8);text-align:center;color:var(--color-neutral-500);font-size:14px;">您還沒有開過課。</div>
+    </sc-if>
+  </section>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    showEmpty: false,
+    reschedulingId: null, rNewStart: '',
+    courses: [
+      { id: 1, title: '早晨重量訓練', branch: '信義店', startTime: '明天 07:00', confirmed: 8, capacity: 12, wl: 0, wlCap: 5, status: 'OPEN' },
+      { id: 2, title: '核心訓練營', branch: '信義店', startTime: '今天 08:00', confirmed: 10, capacity: 10, wl: 0, wlCap: 4, status: 'STARTED' },
+      { id: 3, title: '重量訓練進階班', branch: '信義店', startTime: '週五 07:00', confirmed: 4, capacity: 12, wl: 0, wlCap: 5, status: 'OPEN' },
+      { id: 4, title: '拉丁舞入門', branch: '信義店', startTime: '昨天 18:00', confirmed: 9, capacity: 10, wl: 0, wlCap: 3, status: 'ENDED' },
+    ],
+  };
+
+  statusMeta = {
+    OPEN: { label: '可預約', tint: 'oklch(94% 0.045 150)', text: 'oklch(30% 0.09 150)' },
+    STARTED: { label: '已開始', tint: 'var(--color-neutral-200)', text: 'var(--color-neutral-700)' },
+    ENDED: { label: '已結束', tint: 'var(--color-neutral-200)', text: 'var(--color-neutral-700)' },
+    CANCELLED: { label: '已停課', tint: 'oklch(94% 0.045 25)', text: 'oklch(32% 0.1 25)' },
+  };
+
+  renderVals() {
+    const s = this.state;
+    const courses = s.courses.map(c => {
+      const meta = this.statusMeta[c.status];
+      const schedulable = c.status === 'OPEN';
+      return {
+        title: c.title, branch: c.branch, startTime: c.startTime,
+        seats: `${c.confirmed}/${c.capacity}`, waitlist: c.wlCap ? `${c.wl}/${c.wlCap}` : '—',
+        statusLabel: meta.label, tagStyle: `background:${meta.tint};color:${meta.text};`, tagClass: '',
+        schedulable,
+        onReschedule: () => this.setState({ reschedulingId: c.id, rNewStart: '' }),
+        onCancelCourse: () => this.setState({ courses: s.courses.map(x => x.id === c.id ? { ...x, status: 'CANCELLED' } : x) }),
+      };
+    });
+
+    const rc = s.courses.find(c => c.id === s.reschedulingId);
+    const reschedule = rc ? {
+      title: rc.title, newStart: s.rNewStart,
+      onStartChange: e => this.setState({ rNewStart: e.target.value }),
+      confirm: () => this.setState({ courses: s.courses.map(x => x.id === rc.id ? { ...x, startTime: '已調整' } : x), reschedulingId: null }),
+      cancel: () => this.setState({ reschedulingId: null }),
+    } : null;
+
+    return {
+      hasCourses: !s.showEmpty, noCourses: s.showEmpty,
+      setHasCourses: () => this.setState({ showEmpty: false }),
+      setNoCourses: () => this.setState({ showEmpty: true }),
+      courses, reschedule,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

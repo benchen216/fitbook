@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/styles.css">
+  <script src="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/_ds_bundle.js"></script>
+  <style>body{margin:0;}</style>
+</helmet>
+<dc-import name="TopBar" variant="guest" active-nav="未登入" hint-size="100%,60px"></dc-import>
+<div style="min-height:calc(100vh - 60px);display:flex;align-items:center;justify-content:center;padding:var(--space-6);background:var(--color-bg);box-sizing:border-box;">
+  <div style="max-width:448px;display:flex;flex-direction:column;align-items:center;gap:var(--space-4);text-align:center;">
+    <div style="width:72px;height:72px;border-radius:50%;background:var(--color-neutral-200);display:flex;align-items:center;justify-content:center;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+        <rect x="5" y="11" width="14" height="10" rx="2" stroke="#7d7979" stroke-width="1.6"></rect>
+        <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="#7d7979" stroke-width="1.6"></path>
+        <circle cx="12" cy="16" r="1.4" fill="#7d7979"></circle>
+      </svg>
+    </div>
+    <h1 style="font-size:24px;margin:0;font-family:var(--font-heading);">請先登入</h1>
+    <p style="font-size:15px;line-height:1.6;color:var(--color-neutral-600);margin:0;">
+      未登入狀態僅能瀏覽公開頁面，無法查詢會籍資料、預約課程，或使用櫃檯與後台功能。請先選擇身分登入以繼續。
+    </p>
+    <a href="Login RolePicker.dc.html" class="btn btn-primary" style="margin-top:var(--space-2);">前往登入</a>
+  </div>
+</div>
+
+</x-dc>
+</body>
+</html>

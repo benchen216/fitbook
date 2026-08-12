@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/styles.css">
+  <script src="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/_ds_bundle.js"></script>
+</helmet>
+<nav class="nav" style="justify-content:space-between;background:var(--color-bg);position:sticky;top:0;z-index:10;box-shadow:var(--shadow-sm);font-family:var(--font-body);">
+  <div style="display:flex;align-items:center;gap:var(--space-6);">
+    <span class="nav-brand" style="margin-right:0;">
+      <span style="color:var(--color-neutral-800);">Fit</span><span style="color:var(--color-accent-700);">Book</span>
+    </span>
+    <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="4">
+        <a href="{{ item.href }}" style="{{ item.style }}" style-hover="{{ item.hoverStyle }}">{{ item.label }}</a>
+      </sc-for>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:var(--space-3);">
+    <span class="tag {{ chipClass }}">{{ chipLabel }}</span>
+    <a href="Login RolePicker.dc.html" class="btn btn-ghost">登出</a>
+  </div>
+</nav>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1024,&quot;height&quot;:60},&quot;variant&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;member&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;guest&quot;,&quot;member&quot;,&quot;front_desk&quot;,&quot;store_manager&quot;,&quot;coach&quot;]},&quot;memberName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;王小明&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;branchName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;信義店&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;activeNav&quot;:{&quot;editor&quot;:null,&quot;default&quot;:&quot;我的會籍&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  navMap = {
+    guest: [{ label: '未登入', href: null, active: true }],
+    member: [
+      { label: '我的會籍', href: 'Member My Membership.dc.html' },
+      { label: '課程列表', href: 'Member Course List.dc.html' },
+      { label: '我的預約', href: 'Member My Bookings.dc.html' },
+      { label: '爽約與停權', href: 'Member No-Show Suspension.dc.html' },
+    ],
+    front_desk: [
+      { label: '會員與會籍', href: 'Front Desk Members.dc.html' },
+      { label: '代預約', href: 'Front Desk Booking.dc.html' },
+      { label: '報到作業', href: 'Front Desk Checkin.dc.html' },
+    ],
+    store_manager: [
+      { label: '課程管理', href: 'Store Manager Courses.dc.html' },
+      { label: '員工帳號', href: 'Store Manager Staff.dc.html' },
+      { label: '櫃檯作業', href: 'Store Manager Counter.dc.html' },
+    ],
+    coach: [
+      { label: '開課', href: 'Coach Open Class.dc.html' },
+      { label: '我的課程', href: 'Coach My Courses.dc.html' },
+    ],
+  };
+
+  chipPrefix = { member: '會員', front_desk: '櫃檯人員', store_manager: '店經理', coach: '教練' };
+
+  style(active, disabled) {
+    const base = 'display:inline-flex;align-items:center;padding:6px 14px;border-radius:999px;font-size:14px;font-family:var(--font-body);text-decoration:none;';
+    if (active) return base + 'background:var(--color-accent-600);color:#fff;';
+    if (disabled) return base + 'color:var(--color-neutral-400);cursor:not-allowed;pointer-events:none;';
+    return base + 'color:var(--color-neutral-700);';
+  }
+
+  hoverStyle(active, disabled) {
+    if (active) return 'background:var(--color-accent-700);';
+    if (disabled) return '';
+    return 'background:var(--color-accent-100);color:var(--color-accent-800);';
+  }
+
+  renderVals() {
+    const variant = this.props.variant || 'member';
+    const activeNav = this.props.activeNav;
+    const source = this.navMap[variant] || this.navMap.member;
+    const navItems = source.map(it => {
+      const active = it.active || it.label === activeNav;
+      return {
+        label: it.label,
+        href: it.href,
+        style: this.style(active, it.disabled),
+        hoverStyle: this.hoverStyle(active, it.disabled),
+      };
+    });
+    const name = this.props.memberName || '王小明';
+    const branch = this.props.branchName || '信義店';
+    const prefix = this.chipPrefix[variant];
+    const chipLabel = variant === 'guest' ? '未登入' : (variant === 'member' ? `${prefix}｜${name}` : `${prefix}｜${name}｜${branch}`);
+    const chipClass = variant === 'guest' ? 'tag-neutral' : 'tag-accent';
+    return { navItems, chipLabel, chipClass };
+  }
+}
+
+</script>
+</body>
+</html>

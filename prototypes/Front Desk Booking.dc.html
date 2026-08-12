@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/styles.css">
+  <script src="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/_ds_bundle.js"></script>
+  <style>body{margin:0;}</style>
+</helmet>
+<dc-import name="TopBar" variant="front_desk" active-nav="代預約" member-name="吳佳蓉" branch-name="信義店" hint-size="100%,60px"></dc-import>
+<div style="max-width:900px;margin:0 auto;padding:var(--space-8) var(--space-6);display:flex;flex-direction:column;gap:var(--space-6);font-family:var(--font-body);color:var(--color-text);box-sizing:border-box;">
+
+  <section style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-4);">
+    <h2 style="margin:0;font-size:18px;">Step 1・代為預約</h2>
+    <div style="display:flex;gap:var(--space-3);flex-wrap:wrap;align-items:flex-end;">
+      <div class="field" style="min-width:200px;"><label style="font-size:12px;color:var(--color-neutral-500);">會員</label>
+        <select class="input" value="{{ selectedMemberId }}" onChange="{{ onMemberChange }}">
+          <option value="m1">陳怡君（生效中）</option>
+          <option value="m2">林志強（凍結中）</option>
+          <option value="m3">黃美玲（已到期）</option>
+          <option value="m4">王建宏（生效中）</option>
+          <option value="m5">張淑芬（無會籍）</option>
+        </select>
+      </div>
+      <div class="field" style="min-width:220px;"><label style="font-size:12px;color:var(--color-neutral-500);">課程</label>
+        <select class="input" value="{{ selectedCourseId }}" onChange="{{ onCourseChange }}">
+          <option value="c1">早晨重量訓練・明天 07:00</option>
+          <option value="c2">進階拳擊有氧・週三 19:00（可候補）</option>
+          <option value="c3">熱瑜珈基礎・週四 09:30</option>
+          <option value="c4">核心訓練營・今天 08:00</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onClick="{{ doBook }}">代為預約</button>
+    </div>
+    <div style="{{ memberNoticeStyle }};padding:12px 16px;border-radius:var(--radius-md);font-size:13px;">{{ memberNoticeText }}</div>
+  </section>
+
+  <section style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-3);">
+    <h2 style="margin:0;font-size:17px;">該會員的預約紀錄</h2>
+    <div style="display:flex;flex-direction:column;">
+      <div style="display:grid;grid-template-columns:2fr 1.5fr 1.2fr 0.9fr 0.9fr;gap:var(--space-2);padding:var(--space-2);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 60%, transparent);border-bottom:1px solid var(--color-divider);">
+        <span>課程</span><span>開始時間</span><span>狀態</span><span>候補</span><span>取消</span>
+      </div>
+      <sc-for list="{{ bookings }}" as="b" hint-placeholder-count="3">
+        <div style="display:grid;grid-template-columns:2fr 1.5fr 1.2fr 0.9fr 0.9fr;gap:var(--space-2);align-items:center;padding:var(--space-2);font-size:14px;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);">
+          <span>{{ b.title }}</span>
+          <span>{{ b.startTime }}</span>
+          <span class="{{ b.tagClass }}" style="{{ b.tagStyle }};display:inline-flex;padding:3px 10px;border-radius:calc(var(--radius-md)*0.75);font-size:11px;width:fit-content;">{{ b.statusLabel }}</span>
+          <span>{{ b.waitlistNo }}</span>
+          <span>
+            <sc-if value="{{ b.cancellable }}" hint-placeholder-val="{{ false }}">
+              <button class="btn btn-ghost" onClick="{{ b.onCancel }}" style="color:oklch(50% 0.16 25);">取消</button>
+            </sc-if>
+            <sc-if value="{{ b.notCancellable }}" hint-placeholder-val="{{ true }}">
+              <span style="color:var(--color-neutral-400);">—</span>
+            </sc-if>
+          </span>
+        </div>
+      </sc-for>
+      <sc-if value="{{ noBookings }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:var(--space-6);text-align:center;color:var(--color-neutral-500);font-size:13px;">此會員目前沒有預約記錄</div>
+      </sc-if>
+    </div>
+  </section>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  members = [
+    { id: 'm1', name: '陳怡君', status: 'ACTIVE' },
+    { id: 'm2', name: '林志強', status: 'FROZEN' },
+    { id: 'm3', name: '黃美玲', status: 'EXPIRED' },
+    { id: 'm4', name: '王建宏', status: 'ACTIVE' },
+    { id: 'm5', name: '張淑芬', status: 'NO_PLAN' },
+  ];
+  courses = [
+    { id: 'c1', title: '早晨重量訓練', startTime: '明天 07:00', full: false },
+    { id: 'c2', title: '進階拳擊有氧', startTime: '週三 19:00', full: true },
+    { id: 'c3', title: '熱瑜珈基礎', startTime: '週四 09:30', full: false },
+    { id: 'c4', title: '核心訓練營', startTime: '今天 08:00', full: false },
+  ];
+  statusMeta = {
+    ACTIVE: { text: '會籍生效中，可正常預約。', good: true },
+    FROZEN: { text: '會籍已凍結，需先解凍才能預約。', good: false },
+    EXPIRED: { text: '會籍已到期，需先購買新方案。', good: false },
+    NO_PLAN: { text: '此會員尚無會籍，無法預約課程。', good: false },
+  };
+
+  state = {
+    selectedMemberId: 'm1',
+    selectedCourseId: 'c1',
+    bookingsByMember: {
+      m1: [
+        { title: '早晨重量訓練', startTime: '明天 07:00', status: 'CONFIRMED', wl: null },
+        { title: '進階拳擊有氧', startTime: '週三 19:00', status: 'WAITLIST', wl: 2 },
+      ],
+      m4: [{ title: '熱瑜珈基礎', startTime: '週四 09:30', status: 'CONFIRMED', wl: null }],
+    },
+    cancelled: {},
+  };
+
+  renderVals() {
+    const { selectedMemberId, selectedCourseId, bookingsByMember, cancelled } = this.state;
+    const member = this.members.find(m => m.id === selectedMemberId);
+    const meta = this.statusMeta[member.status];
+
+    const raw = bookingsByMember[selectedMemberId] || [];
+    const bookings = raw.map((b, i) => {
+      const key = `${selectedMemberId}-${i}`;
+      const isCancelled = cancelled[key];
+      const status = isCancelled ? 'CANCELLED' : b.status;
+      const labelMap = { CONFIRMED: '已確認', WAITLIST: '候補中', CANCELLED: '已取消' };
+      const styleMap = {
+        CONFIRMED: { tagClass: 'tag-accent', tagStyle: '' },
+        WAITLIST: { tagClass: '', tagStyle: 'background:color-mix(in srgb, var(--color-process-yellow) 20%, var(--color-bg));color:color-mix(in srgb, var(--color-process-yellow) 60%, var(--color-text));' },
+        CANCELLED: { tagClass: 'tag-neutral', tagStyle: '' },
+      };
+      const cancellable = status === 'CONFIRMED' || status === 'WAITLIST';
+      return {
+        title: b.title, startTime: b.startTime,
+        statusLabel: labelMap[status], tagClass: styleMap[status].tagClass, tagStyle: styleMap[status].tagStyle,
+        waitlistNo: b.wl && !isCancelled ? b.wl : '—',
+        cancellable, notCancellable: !cancellable,
+        onCancel: () => this.setState({ cancelled: { ...cancelled, [key]: true } }),
+      };
+    });
+
+    return {
+      selectedMemberId, selectedCourseId,
+      onMemberChange: e => this.setState({ selectedMemberId: e.target.value }),
+      onCourseChange: e => this.setState({ selectedCourseId: e.target.value }),
+      doBook: () => {
+        if (!meta.good) return;
+        const course = this.courses.find(c => c.id === selectedCourseId);
+        const list = bookingsByMember[selectedMemberId] || [];
+        this.setState({ bookingsByMember: { ...bookingsByMember, [selectedMemberId]: [...list, { title: course.title, startTime: course.startTime, status: course.full ? 'WAITLIST' : 'CONFIRMED', wl: course.full ? list.length + 1 : null }] } });
+      },
+      memberNoticeStyle: meta.good ? 'background:oklch(94% 0.045 150);color:oklch(28% 0.09 150);' : 'background:color-mix(in srgb, var(--color-process-yellow) 16%, var(--color-bg));color:color-mix(in srgb, var(--color-process-yellow) 55%, var(--color-text));',
+      memberNoticeText: `${member.name}：${meta.text}`,
+      bookings,
+      noBookings: bookings.length === 0,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

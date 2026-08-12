@@ -1,0 +1,17 @@
+node_modules/
+dist/
+
+# AI tool local config/skill caches
+.agents/
+.codex/
+.cursor/
+.gemini/
+.grok/
+.impeccable/
+.kiro/
+.opencode/
+.pi/
+.qoder/
+.rovodev/
+.vibe/
+.claude/

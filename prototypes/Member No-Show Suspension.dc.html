@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/styles.css">
+  <script src="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/_ds_bundle.js"></script>
+  <style>body{margin:0;}</style>
+</helmet>
+<dc-import name="TopBar" variant="member" active-nav="爽約與停權" member-name="王小明" hint-size="100%,60px"></dc-import>
+<div style="max-width:900px;margin:0 auto;padding:var(--space-8) var(--space-6);display:flex;flex-direction:column;gap:var(--space-6);font-family:var(--font-body);color:var(--color-text);box-sizing:border-box;">
+
+  <section style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-4);">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:var(--space-3);">
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <h2 style="margin:0;font-size:20px;">爽約與停權</h2>
+        <p style="margin:0;font-size:13px;color:var(--color-neutral-500);max-width:560px;">系統以最近 30 天為滾動窗口計算缺席（未報到）記點；累積達 3 點將暫停預約權 7 天，到期後自動恢復；已滾出窗口的記點不再計入門檻判斷。</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;color:var(--color-neutral-500);">示範狀態</span>
+        <div class="seg" style="font-size:12px;">
+          <label class="seg-opt"><input type="radio" name="bstatus" checked="{{ bookingOK }}" onChange="{{ setOK }}"></input>正常</label>
+          <label class="seg-opt"><input type="radio" name="bstatus" checked="{{ bookingSuspended }}" onChange="{{ setSuspended }}"></input>停權</label>
+        </div>
+      </div>
+    </div>
+    <sc-if value="{{ bookingOK }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:14px 18px;border-radius:var(--radius-md);font-size:13px;background:oklch(94% 0.045 150);color:oklch(28% 0.09 150);">預約權正常，最近 30 天記點 {{ count }}/3。</div>
+    </sc-if>
+    <sc-if value="{{ bookingSuspended }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:14px 18px;border-radius:var(--radius-md);font-size:13px;background:oklch(94% 0.045 25);color:oklch(32% 0.1 25);">預約權已暫停，最近 30 天記點 {{ count }}/3，將於 2026年8月19日 09:00 恢復。</div>
+    </sc-if>
+  </section>
+
+  <section style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-3);">
+    <h2 style="margin:0;font-size:18px;">記點明細（共 {{ count }} 點）</h2>
+    <div style="display:flex;flex-direction:column;">
+      <div style="display:grid;grid-template-columns:0.5fr 2fr 1.5fr 1.3fr;gap:var(--space-2);padding:var(--space-2);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 60%, transparent);border-bottom:1px solid var(--color-divider);">
+        <span>#</span><span>課程</span><span>記點時間</span><span>狀態</span>
+      </div>
+      <sc-for list="{{ records }}" as="r" hint-placeholder-count="4">
+        <div style="display:grid;grid-template-columns:0.5fr 2fr 1.5fr 1.3fr;gap:var(--space-2);align-items:center;padding:var(--space-2);font-size:14px;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);">
+          <span>{{ r.idx }}</span>
+          <span>{{ r.title }}</span>
+          <span style="color:var(--color-neutral-600);">{{ r.time }}</span>
+          <span class="{{ r.tagClass }}" style="{{ r.tagStyle }};display:inline-flex;padding:3px 10px;border-radius:calc(var(--radius-md)*0.75);font-size:11px;width:fit-content;">{{ r.label }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { bookingStatus: 'OK' };
+
+  okRecords = [
+    { title: '熱瑜珈基礎', time: '5 天前', inWindow: true },
+    { title: '核心訓練營', time: '18 天前', inWindow: true },
+    { title: '晨間拉筋', time: '40 天前', inWindow: false },
+    { title: '拳擊有氧', time: '55 天前', inWindow: false },
+  ];
+  suspendedRecords = [
+    { title: '熱瑜珈基礎', time: '2 天前', inWindow: true },
+    { title: '核心訓練營', time: '10 天前', inWindow: true },
+    { title: '拳擊有氧', time: '16 天前', inWindow: true },
+    { title: '晨間拉筋', time: '40 天前', inWindow: false },
+    { title: '壺鈴體能', time: '58 天前', inWindow: false },
+  ];
+
+  renderVals() {
+    const { bookingStatus } = this.state;
+    const src = bookingStatus === 'OK' ? this.okRecords : this.suspendedRecords;
+    const count = src.filter(r => r.inWindow).length;
+    const records = src.map((r, i) => ({
+      idx: i + 1,
+      title: r.title,
+      time: r.time,
+      label: r.inWindow ? '窗口內' : '已滾出窗口',
+      tagClass: r.inWindow ? '' : 'tag-neutral',
+      tagStyle: r.inWindow ? 'background:color-mix(in srgb, var(--color-process-yellow) 20%, var(--color-bg));color:color-mix(in srgb, var(--color-process-yellow) 60%, var(--color-text));' : '',
+    }));
+    return {
+      bookingOK: bookingStatus === 'OK',
+      bookingSuspended: bookingStatus === 'SUSPENDED',
+      setOK: () => this.setState({ bookingStatus: 'OK' }),
+      setSuspended: () => this.setState({ bookingStatus: 'SUSPENDED' }),
+      count,
+      records,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

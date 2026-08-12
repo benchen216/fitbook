@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/styles.css">
+  <script src="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/_ds_bundle.js"></script>
+  <style>body{margin:0;}</style>
+</helmet>
+<dc-import name="TopBar" variant="store_manager" active-nav="員工帳號" member-name="蔡宗翰" branch-name="信義店" hint-size="100%,60px"></dc-import>
+<div style="max-width:900px;margin:0 auto;padding:var(--space-8) var(--space-6);display:flex;flex-direction:column;gap:var(--space-6);font-family:var(--font-body);color:var(--color-text);box-sizing:border-box;">
+
+  <section style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;flex-direction:column;gap:10px;">
+    <h2 style="margin:0;font-size:17px;">Step 1・建立員工帳號</h2>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+      <div class="field" style="min-width:200px;"><label style="font-size:12px;color:var(--color-neutral-500);">姓名</label><input class="input" value="{{ newName }}" onChange="{{ onNameChange }}" placeholder="吳佳蓉"></input></div>
+      <div class="field" style="min-width:160px;"><label style="font-size:12px;color:var(--color-neutral-500);">角色</label>
+        <select class="input" value="{{ newRole }}" onChange="{{ onRoleChange }}">
+          <option value="櫃檯人員">櫃檯人員</option>
+          <option value="教練">教練</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onClick="{{ createStaff }}">建立</button>
+    </div>
+  </section>
+
+  <section style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;flex-direction:column;gap:10px;">
+    <h2 style="margin:0;font-size:17px;">員工列表</h2>
+    <div style="display:flex;flex-direction:column;">
+      <div style="display:grid;grid-template-columns:1.6fr 1.2fr 1fr 1fr;gap:var(--space-2);padding:var(--space-2);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 60%, transparent);border-bottom:1px solid var(--color-divider);">
+        <span>姓名</span><span>角色</span><span>狀態</span><span>操作</span>
+      </div>
+      <sc-for list="{{ staff }}" as="p" hint-placeholder-count="5">
+        <div style="display:grid;grid-template-columns:1.6fr 1.2fr 1fr 1fr;gap:var(--space-2);align-items:center;padding:var(--space-2);font-size:14px;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);">
+          <span>{{ p.name }}</span>
+          <span>{{ p.role }}</span>
+          <span class="{{ p.tagClass }}" style="display:inline-flex;padding:3px 10px;border-radius:calc(var(--radius-md)*0.75);font-size:11px;width:fit-content;">{{ p.statusLabel }}</span>
+          <button class="btn btn-secondary" style="padding:6px 10px;font-size:12px;width:fit-content;" onClick="{{ p.toggle }}">{{ p.actionLabel }}</button>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    newName: '', newRole: '櫃檯人員',
+    staff: [
+      { id: 1, name: '吳佳蓉', role: '櫃檯人員', active: true },
+      { id: 2, name: '鄭雅婷', role: '櫃檯人員', active: true },
+      { id: 3, name: '游承恩', role: '教練', active: true },
+      { id: 4, name: '賴思婷', role: '教練', active: true },
+      { id: 5, name: '簡佩瑜', role: '教練', active: false },
+    ],
+    nextId: 6,
+  };
+
+  renderVals() {
+    const s = this.state;
+    const staff = s.staff.map(p => ({
+      name: p.name, role: p.role,
+      statusLabel: p.active ? '在職' : '停用',
+      tagClass: p.active ? 'tag-accent' : 'tag-neutral',
+      actionLabel: p.active ? '停用' : '啟用',
+      toggle: () => this.setState({ staff: s.staff.map(x => x.id === p.id ? { ...x, active: !x.active } : x) }),
+    }));
+    return {
+      newName: s.newName, newRole: s.newRole,
+      onNameChange: e => this.setState({ newName: e.target.value }),
+      onRoleChange: e => this.setState({ newRole: e.target.value }),
+      createStaff: () => {
+        if (!s.newName) return;
+        this.setState(prev => ({ staff: [...prev.staff, { id: prev.nextId, name: prev.newName, role: prev.newRole, active: true }], nextId: prev.nextId + 1, newName: '' }));
+      },
+      staff,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

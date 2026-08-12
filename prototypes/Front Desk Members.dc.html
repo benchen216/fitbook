@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/styles.css">
+  <script src="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/_ds_bundle.js"></script>
+  <style>body{margin:0;}</style>
+</helmet>
+<dc-import name="TopBar" variant="front_desk" active-nav="會員與會籍" member-name="吳佳蓉" branch-name="信義店" hint-size="100%,60px"></dc-import>
+<div style="max-width:1080px;margin:0 auto;padding:var(--space-8) var(--space-6);display:flex;flex-direction:column;gap:var(--space-6);font-family:var(--font-body);color:var(--color-text);box-sizing:border-box;">
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:var(--space-6);">
+    <section style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-3);">
+      <h2 style="margin:0;font-size:17px;">Step 1・建立會員主檔</h2>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="field"><label style="font-size:12px;color:var(--color-neutral-500);">姓名</label><input class="input" value="{{ newName }}" onChange="{{ onNameChange }}" placeholder="王小明"></input></div>
+        <div class="field"><label style="font-size:12px;color:var(--color-neutral-500);">手機</label><input class="input" value="{{ newPhone }}" onChange="{{ onPhoneChange }}" placeholder="0912-345-678"></input></div>
+        <div class="field"><label style="font-size:12px;color:var(--color-neutral-500);">Email</label><input class="input" value="{{ newEmail }}" onChange="{{ onEmailChange }}" placeholder="name@example.com"></input></div>
+        <div class="field"><label style="font-size:12px;color:var(--color-neutral-500);">身分證</label><input class="input" value="{{ newId }}" onChange="{{ onIdChange }}" placeholder="A123456789"></input></div>
+      </div>
+      <button class="btn btn-primary" onClick="{{ createMember }}" style="align-self:flex-start;">建立會員</button>
+      <sc-if value="{{ createdMsg }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:13px;color:var(--color-accent-700);">{{ createdMsg }}</div>
+      </sc-if>
+    </section>
+
+    <section style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-3);">
+      <h2 style="margin:0;font-size:17px;">Step 2・電話查詢會員</h2>
+      <div style="display:flex;gap:10px;">
+        <input class="input" value="{{ lookupPhone }}" onChange="{{ onLookupChange }}" placeholder="輸入手機號碼"></input>
+        <button class="btn btn-secondary" onClick="{{ doLookup }}">查詢</button>
+      </div>
+      <sc-if value="{{ lookupResult }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ lookupNoticeStyle }};padding:12px 16px;border-radius:var(--radius-md);font-size:13px;">{{ lookupResult }}</div>
+      </sc-if>
+    </section>
+  </div>
+
+  <section style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-3);">
+    <h2 style="margin:0;font-size:17px;">Step 3・會員與會籍作業</h2>
+    <div style="display:flex;flex-direction:column;overflow-x:auto;">
+      <div style="display:grid;grid-template-columns:0.8fr 1.3fr 1fr 1fr 1.1fr 1fr 2fr;gap:var(--space-2);padding:var(--space-2);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 60%, transparent);border-bottom:1px solid var(--color-divider);min-width:820px;">
+        <span>會員#</span><span>手機</span><span>方案</span><span>狀態</span><span>到期日</span><span>凍結次數</span><span>作業</span>
+      </div>
+      <sc-for list="{{ members }}" as="m" hint-placeholder-count="5">
+        <div style="display:grid;grid-template-columns:0.8fr 1.3fr 1fr 1fr 1.1fr 1fr 2fr;gap:var(--space-2);align-items:center;padding:var(--space-2);font-size:13.5px;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);min-width:820px;">
+          <span>{{ m.id }}</span>
+          <span>{{ m.phone }}</span>
+          <span>{{ m.plan }}</span>
+          <span class="{{ m.tagClass }}" style="{{ m.tagStyle }};display:inline-flex;padding:3px 10px;border-radius:calc(var(--radius-md)*0.75);font-size:11px;width:fit-content;">{{ m.statusLabel }}</span>
+          <span>{{ m.expiry }}</span>
+          <span>{{ m.freezeCount }}</span>
+          <span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <sc-if value="{{ m.showPurchase }}" hint-placeholder-val="{{ false }}">
+              <select class="input" style="width:auto;min-height:32px;padding:4px 8px;font-size:12px;" value="{{ m.selectedPlan }}" onChange="{{ m.onPlanChange }}">
+                <option value="月約">月約</option>
+                <option value="季約">季約</option>
+                <option value="年約">年約</option>
+                <option value="年約 VIP">年約 VIP</option>
+              </select>
+              <button class="btn btn-secondary" style="padding:6px 10px;font-size:12px;" onClick="{{ m.onPurchase }}">購會籍</button>
+            </sc-if>
+            <sc-if value="{{ m.showMarkPaid }}" hint-placeholder-val="{{ false }}">
+              <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onClick="{{ m.onMarkPaid }}">標記付款</button>
+            </sc-if>
+            <sc-if value="{{ m.showFreeze }}" hint-placeholder-val="{{ false }}">
+              <input class="input" style="width:120px;min-height:32px;padding:4px 8px;font-size:12px;" placeholder="凍結原因" value="{{ m.freezeReason }}" onChange="{{ m.onReasonChange }}"></input>
+              <button class="btn btn-secondary" style="padding:6px 10px;font-size:12px;" onClick="{{ m.onFreeze }}">凍結</button>
+            </sc-if>
+            <sc-if value="{{ m.showUnfreeze }}" hint-placeholder-val="{{ false }}">
+              <button class="btn btn-secondary" style="padding:6px 10px;font-size:12px;" onClick="{{ m.onUnfreeze }}">解凍</button>
+            </sc-if>
+          </span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    newName: '', newPhone: '', newEmail: '', newId: '', createdMsg: '',
+    lookupPhone: '', lookupResult: '', lookupFound: null,
+    members: [
+      { id: '#1001', phone: '0912-345-678', plan: '—', status: 'NO_PLAN', expiry: '—', freezeCount: '—', selectedPlan: '月約', freezeReason: '' },
+      { id: '#1002', phone: '0923-456-789', plan: '季約', status: 'PENDING_PAYMENT', expiry: '—', freezeCount: '0/2', selectedPlan: '季約', freezeReason: '' },
+      { id: '#1003', phone: '0934-567-890', plan: '年約 VIP', status: 'ACTIVE', expiry: '2027年2月10日', freezeCount: '1/2', selectedPlan: '', freezeReason: '' },
+      { id: '#1004', phone: '0945-678-901', plan: '月約', status: 'FROZEN', expiry: '2026年9月5日', freezeCount: '2/2', selectedPlan: '', freezeReason: '' },
+      { id: '#1005', phone: '0956-789-012', plan: '年約', status: 'ACTIVE', expiry: '2027年5月1日', freezeCount: '0/2', selectedPlan: '', freezeReason: '' },
+    ],
+    nextId: 1006,
+  };
+
+  statusMeta = {
+    NO_PLAN: { label: '無會籍', tagClass: 'tag-neutral', tagStyle: '' },
+    PENDING_PAYMENT: { label: '待付款', tagClass: '', tagStyle: 'background:color-mix(in srgb, var(--color-process-yellow) 20%, var(--color-bg));color:color-mix(in srgb, var(--color-process-yellow) 60%, var(--color-text));' },
+    ACTIVE: { label: '生效中', tagClass: 'tag-accent', tagStyle: '' },
+    FROZEN: { label: '凍結中', tagClass: 'tag-outline', tagStyle: '' },
+  };
+
+  updateMember(id, patch) {
+    this.setState(s => ({ members: s.members.map(m => m.id === id ? { ...m, ...patch } : m) }));
+  }
+
+  renderVals() {
+    const s = this.state;
+
+    const members = s.members.map(m => {
+      const meta = this.statusMeta[m.status];
+      return {
+        id: m.id, phone: m.phone, plan: m.plan, expiry: m.expiry, freezeCount: m.freezeCount,
+        statusLabel: meta.label, tagClass: meta.tagClass, tagStyle: meta.tagStyle,
+        showPurchase: m.status === 'NO_PLAN',
+        showMarkPaid: m.status === 'PENDING_PAYMENT',
+        showFreeze: m.status === 'ACTIVE',
+        showUnfreeze: m.status === 'FROZEN',
+        selectedPlan: m.selectedPlan,
+        freezeReason: m.freezeReason,
+        onPlanChange: e => this.updateMember(m.id, { selectedPlan: e.target.value }),
+        onReasonChange: e => this.updateMember(m.id, { freezeReason: e.target.value }),
+        onPurchase: () => this.updateMember(m.id, { plan: m.selectedPlan || '月約', status: 'PENDING_PAYMENT' }),
+        onMarkPaid: () => this.updateMember(m.id, { status: 'ACTIVE', expiry: '2027年8月12日', freezeCount: '0/2' }),
+        onFreeze: () => this.updateMember(m.id, { status: 'FROZEN' }),
+        onUnfreeze: () => this.updateMember(m.id, { status: 'ACTIVE', freezeReason: '' }),
+      };
+    });
+
+    return {
+      newName: s.newName, newPhone: s.newPhone, newEmail: s.newEmail, newId: s.newId,
+      onNameChange: e => this.setState({ newName: e.target.value }),
+      onPhoneChange: e => this.setState({ newPhone: e.target.value }),
+      onEmailChange: e => this.setState({ newEmail: e.target.value }),
+      onIdChange: e => this.setState({ newId: e.target.value }),
+      createMember: () => {
+        if (!s.newName || !s.newPhone) return;
+        const id = `#${s.nextId}`;
+        this.setState(prev => ({
+          members: [...prev.members, { id, phone: s.newPhone, plan: '—', status: 'NO_PLAN', expiry: '—', freezeCount: '—', selectedPlan: '月約', freezeReason: '' }],
+          nextId: prev.nextId + 1,
+          newName: '', newPhone: '', newEmail: '', newId: '',
+          createdMsg: `已建立會員 ${id}（${s.newName}）`,
+        }));
+      },
+      createdMsg: s.createdMsg,
+      lookupPhone: s.lookupPhone,
+      onLookupChange: e => this.setState({ lookupPhone: e.target.value }),
+      doLookup: () => {
+        const found = s.members.find(m => m.phone.includes(s.lookupPhone.trim()) && s.lookupPhone.trim());
+        this.setState({
+          lookupResult: found ? `找到會員 ${found.id}，方案：${found.plan}，狀態：${this.statusMeta[found.status].label}` : '找不到符合的會員',
+          lookupFound: found || null,
+        });
+      },
+      lookupResult: s.lookupResult,
+      lookupNoticeStyle: s.lookupFound ? 'background:oklch(94% 0.045 150);color:oklch(28% 0.09 150);' : 'background:oklch(94% 0.045 25);color:oklch(32% 0.1 25);',
+      members,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

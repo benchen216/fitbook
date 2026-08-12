@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/styles.css">
+  <script src="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/_ds_bundle.js"></script>
+  <style>body{margin:0;}</style>
+</helmet>
+<dc-import name="TopBar" variant="member" active-nav="我的預約" member-name="王小明" hint-size="100%,60px"></dc-import>
+<div style="max-width:900px;margin:0 auto;padding:var(--space-8) var(--space-6);display:flex;flex-direction:column;gap:var(--space-6);font-family:var(--font-body);color:var(--color-text);box-sizing:border-box;">
+
+  <section style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-4);">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <h2 style="margin:0;font-size:20px;">我的預約</h2>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;color:var(--color-neutral-500);">示範</span>
+        <div class="seg" style="font-size:12px;">
+          <label class="seg-opt"><input type="radio" name="hasBookings" checked="{{ hasBookings }}" onChange="{{ setHasBookings }}"></input>有預約</label>
+          <label class="seg-opt"><input type="radio" name="hasBookings" checked="{{ noBookings }}" onChange="{{ setNoBookings }}"></input>無預約</label>
+        </div>
+      </div>
+    </div>
+
+    <sc-if value="{{ hasBookings }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;">
+        <div style="display:grid;grid-template-columns:2fr 2fr 1.3fr 1fr 0.8fr 0.8fr;gap:var(--space-2);padding:var(--space-2);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 60%, transparent);border-bottom:1px solid var(--color-divider);">
+          <span>課程</span><span>分店／教練</span><span>開始時間</span><span>狀態</span><span>候補序號</span><span>操作</span>
+        </div>
+        <sc-for list="{{ bookings }}" as="bk" hint-placeholder-count="4">
+          <div style="display:grid;grid-template-columns:2fr 2fr 1.3fr 1fr 0.8fr 0.8fr;gap:var(--space-2);align-items:center;padding:var(--space-2);font-size:14px;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);">
+            <span>{{ bk.title }}</span>
+            <span>{{ bk.branchCoach }}</span>
+            <span>{{ bk.startTime }}</span>
+            <span><span class="tag" style="{{ bk.badgeStyle }}">{{ bk.statusLabel }}</span></span>
+            <span>{{ bk.waitlistNo }}</span>
+            <span>
+              <sc-if value="{{ bk.cancellable }}" hint-placeholder-val="{{ false }}">
+                <button class="btn btn-ghost" onClick="{{ bk.onCancel }}" style="color:oklch(50% 0.16 25);">取消</button>
+              </sc-if>
+              <sc-if value="{{ bk.notCancellable }}" hint-placeholder-val="{{ true }}">
+                <span style="color:var(--color-neutral-400);">—</span>
+              </sc-if>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ noBookings }}" hint-placeholder-val="{{ false }}">
+      <div style="border:1px dashed var(--color-neutral-300);border-radius:var(--radius-lg);padding:var(--space-8);text-align:center;color:var(--color-neutral-500);font-size:14px;display:flex;flex-direction:column;gap:10px;align-items:center;">
+        <span>目前沒有預約記錄</span>
+        <a href="Member Course List.dc.html" class="btn btn-ghost">去看課程</a>
+      </div>
+    </sc-if>
+  </section>
+
+  <section style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);">
+    <h3 style="margin:0 0 6px;font-size:14px;color:var(--color-neutral-700);">狀態怎麼流轉？</h3>
+    <p style="margin:0;font-size:12.5px;line-height:1.7;color:var(--color-neutral-500);">
+      已確認 的預約，開課後依報到情況轉為 已報到 或 未報到（記一次缺席點）；候補中 若有名額釋出會自動轉為 已確認 並通知你；若課程本身被停課，所有預約與候補會直接標記 已取消，不計入缺席記點。
+    </p>
+  </section>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { showEmpty: false, cancelled: {} };
+
+  bookingDefs = [
+    { id: 1, title: '早晨重量訓練', branchCoach: '信義店｜陳建豪教練', startTime: '明天 07:00', status: 'CONFIRMED', wl: null },
+    { id: 2, title: '進階拳擊有氧', branchCoach: '大安店｜林雅涵教練', startTime: '週三 19:00', status: 'WAITLIST', wl: 3 },
+    { id: 3, title: '核心訓練營', branchCoach: '信義店｜陳建豪教練', startTime: '今天 08:00', status: 'CHECKED_IN', wl: null },
+    { id: 4, title: '拉丁舞入門', branchCoach: '大安店｜周書豪教練', startTime: '昨天 18:00', status: 'NO_SHOW', wl: null },
+  ];
+
+  statusMeta = {
+    CONFIRMED: { label: '已確認', style: 'background:var(--color-accent-100);color:var(--color-accent-800);' },
+    WAITLIST: { label: '候補中', style: 'background:color-mix(in srgb, var(--color-process-yellow) 20%, var(--color-bg));color:color-mix(in srgb, var(--color-process-yellow) 60%, var(--color-text));' },
+    CHECKED_IN: { label: '已報到', style: 'background:var(--color-neutral-100);color:var(--color-neutral-800);' },
+    NO_SHOW: { label: '未報到', style: 'background:oklch(94% 0.045 25);color:oklch(32% 0.1 25);' },
+    CANCELLED: { label: '已取消', style: 'background:var(--color-neutral-100);color:var(--color-neutral-600);' },
+  };
+
+  renderVals() {
+    const { showEmpty, cancelled } = this.state;
+
+    const bookings = this.bookingDefs.map(b => {
+      const status = cancelled[b.id] ? 'CANCELLED' : b.status;
+      const meta = this.statusMeta[status];
+      const cancellable = status === 'CONFIRMED' || status === 'WAITLIST';
+      return {
+        title: b.title,
+        branchCoach: b.branchCoach,
+        startTime: b.startTime,
+        statusLabel: meta.label,
+        badgeStyle: meta.style,
+        waitlistNo: b.wl && !cancelled[b.id] ? b.wl : '—',
+        cancellable,
+        notCancellable: !cancellable,
+        onCancel: () => this.setState({ cancelled: { ...cancelled, [b.id]: true } }),
+      };
+    });
+
+    return {
+      hasBookings: !showEmpty,
+      noBookings: showEmpty,
+      setHasBookings: () => this.setState({ showEmpty: false }),
+      setNoBookings: () => this.setState({ showEmpty: true }),
+      bookings,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

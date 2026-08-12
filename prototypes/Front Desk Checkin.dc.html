@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/styles.css">
+  <script src="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/_ds_bundle.js"></script>
+  <style>body{margin:0;}</style>
+</helmet>
+<dc-import name="TopBar" variant="front_desk" active-nav="報到作業" member-name="吳佳蓉" branch-name="信義店" hint-size="100%,60px"></dc-import>
+<div style="max-width:1000px;margin:0 auto;padding:var(--space-8) var(--space-6);display:flex;flex-direction:column;gap:var(--space-6);font-family:var(--font-body);color:var(--color-text);box-sizing:border-box;">
+
+  <div style="padding:12px 16px;border-radius:var(--radius-md);font-size:13px;background:var(--color-neutral-100);color:var(--color-neutral-700);">
+    報到開放時間為開課前 30 分鐘至該堂課結束；僅顯示本分店（信義店）的課程。
+  </div>
+
+  <section style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-4);">
+    <h2 style="margin:0;font-size:17px;">選擇課程</h2>
+    <div style="display:flex;gap:var(--space-3);flex-wrap:wrap;">
+      <sc-for list="{{ courses }}" as="c" hint-placeholder-count="4">
+        <div onClick="{{ c.select }}" style="{{ c.chipStyle }};cursor:pointer;padding:10px 16px;border-radius:var(--radius-lg);display:flex;flex-direction:column;gap:4px;min-width:160px;">
+          <span style="font-family:var(--font-heading);font-weight:600;font-size:14px;">{{ c.title }}</span>
+          <span style="font-size:12px;color:var(--color-neutral-600);">{{ c.time }}</span>
+          <span class="{{ c.tagClass }}" style="{{ c.tagStyle }};display:inline-flex;padding:2px 8px;border-radius:calc(var(--radius-md)*0.75);font-size:10.5px;width:fit-content;">{{ c.statusLabel }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-3);">
+    <h2 style="margin:0;font-size:17px;">{{ rosterTitle }}</h2>
+    <div style="display:flex;flex-direction:column;">
+      <div style="display:grid;grid-template-columns:1.4fr 1.3fr 1fr 0.8fr 1fr 0.9fr;gap:var(--space-2);padding:var(--space-2);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 60%, transparent);border-bottom:1px solid var(--color-divider);">
+        <span>會員</span><span>手機</span><span>狀態</span><span>候補</span><span>報到時間</span><span>報到</span>
+      </div>
+      <sc-for list="{{ roster }}" as="p" hint-placeholder-count="4">
+        <div style="display:grid;grid-template-columns:1.4fr 1.3fr 1fr 0.8fr 1fr 0.9fr;gap:var(--space-2);align-items:center;padding:var(--space-2);font-size:14px;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);">
+          <span>{{ p.name }}</span>
+          <span>{{ p.phone }}</span>
+          <span class="{{ p.tagClass }}" style="{{ p.tagStyle }};display:inline-flex;padding:3px 10px;border-radius:calc(var(--radius-md)*0.75);font-size:11px;width:fit-content;">{{ p.statusLabel }}</span>
+          <span>{{ p.waitlistNo }}</span>
+          <span>{{ p.checkedInAt }}</span>
+          <span>
+            <sc-if value="{{ p.showCheckin }}" hint-placeholder-val="{{ false }}">
+              <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onClick="{{ p.onCheckin }}">報到</button>
+            </sc-if>
+          </span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  courseDefs = [
+    { id: 1, title: '早晨重量訓練', time: '今天 07:00', status: 'OPEN' },
+    { id: 2, title: '核心訓練營', time: '今天 08:00', status: 'NOT_OPEN' },
+    { id: 3, title: '拉丁舞入門', time: '昨天 18:00', status: 'ENDED' },
+    { id: 4, title: '壺鈴體能', time: '週五 20:00', status: 'CANCELLED' },
+  ];
+  statusMeta = {
+    OPEN: { label: '報到中', tagClass: '', tagStyle: 'background:oklch(94% 0.045 150);color:oklch(28% 0.09 150);' },
+    NOT_OPEN: { label: '尚未開放', tagClass: 'tag-neutral', tagStyle: '' },
+    ENDED: { label: '已結束', tagClass: 'tag-neutral', tagStyle: '' },
+    CANCELLED: { label: '已停課', tagClass: '', tagStyle: 'background:oklch(94% 0.045 25);color:oklch(32% 0.1 25);' },
+  };
+  rosterByCourse = {
+    1: [
+      { name: '陳怡君', phone: '0912-345-678', status: 'CONFIRMED', wl: null },
+      { name: '林志強', phone: '0923-456-789', status: 'CONFIRMED', wl: null },
+      { name: '黃美玲', phone: '0934-567-890', status: 'WAITLIST', wl: 1 },
+    ],
+    2: [{ name: '王建宏', phone: '0945-678-901', status: 'CONFIRMED', wl: null }],
+    3: [{ name: '張淑芬', phone: '0956-789-012', status: 'CHECKED_IN', wl: null, checkedInAt: '18:02' }],
+    4: [],
+  };
+
+  state = { selectedCourse: 1, checkedIn: {} };
+
+  renderVals() {
+    const { selectedCourse, checkedIn } = this.state;
+    const courses = this.courseDefs.map(c => {
+      const meta = this.statusMeta[c.status];
+      const selected = c.id === selectedCourse;
+      return {
+        title: c.title, time: c.time,
+        statusLabel: meta.label, tagClass: meta.tagClass, tagStyle: meta.tagStyle,
+        chipStyle: selected ? 'border:1px solid var(--color-accent-600);background:var(--color-accent-100);' : 'border:1px solid var(--color-neutral-200);background:var(--color-bg);',
+        select: () => this.setState({ selectedCourse: c.id }),
+      };
+    });
+
+    const raw = this.rosterByCourse[selectedCourse] || [];
+    const roster = raw.map((p, i) => {
+      const key = `${selectedCourse}-${i}`;
+      const status = checkedIn[key] ? 'CHECKED_IN' : p.status;
+      const labelMap = { CONFIRMED: '已確認', WAITLIST: '候補中', CHECKED_IN: '已報到' };
+      const styleMap = {
+        CONFIRMED: { tagClass: 'tag-accent', tagStyle: '' },
+        WAITLIST: { tagClass: '', tagStyle: 'background:color-mix(in srgb, var(--color-process-yellow) 20%, var(--color-bg));color:color-mix(in srgb, var(--color-process-yellow) 60%, var(--color-text));' },
+        CHECKED_IN: { tagClass: 'tag-neutral', tagStyle: '' },
+      };
+      return {
+        name: p.name, phone: p.phone,
+        statusLabel: labelMap[status], tagClass: styleMap[status].tagClass, tagStyle: styleMap[status].tagStyle,
+        waitlistNo: p.wl ? p.wl : '—',
+        checkedInAt: checkedIn[key] ? '剛剛' : (p.checkedInAt || '—'),
+        showCheckin: status === 'CONFIRMED',
+        onCheckin: () => this.setState({ checkedIn: { ...checkedIn, [key]: true } }),
+      };
+    });
+
+    const course = this.courseDefs.find(c => c.id === selectedCourse);
+    return { courses, roster, rosterTitle: `${course.title}・出席名單`, noRoster: roster.length === 0 };
+  }
+}
+
+</script>
+</body>
+</html>

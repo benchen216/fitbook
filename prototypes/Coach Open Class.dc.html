@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/styles.css">
+  <script src="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/_ds_bundle.js"></script>
+  <style>body{margin:0;}</style>
+</helmet>
+<dc-import name="TopBar" variant="coach" active-nav="開課" member-name="陳建豪" branch-name="信義店" hint-size="100%,60px"></dc-import>
+<div style="max-width:640px;margin:0 auto;padding:var(--space-8) var(--space-6);display:flex;flex-direction:column;gap:var(--space-6);font-family:var(--font-body);color:var(--color-text);box-sizing:border-box;">
+
+  <div style="padding:12px 16px;border-radius:var(--radius-md);font-size:13px;background:var(--color-neutral-100);color:var(--color-neutral-700);">
+    分店與教練姓名已與你的帳號綁定，開課時無法更改。
+  </div>
+
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span style="font-size:11px;color:var(--color-neutral-500);">示範：帳號狀態</span>
+    <div class="seg" style="font-size:12px;">
+      <label class="seg-opt"><input type="radio" name="disabled" checked="{{ enabled }}" onChange="{{ setEnabled }}"></input>啟用</label>
+      <label class="seg-opt"><input type="radio" name="disabled" checked="{{ disabled }}" onChange="{{ setDisabled }}"></input>已停用</label>
+    </div>
+  </div>
+
+  <sc-if value="{{ disabled }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:12px 16px;border-radius:var(--radius-md);font-size:13px;background:oklch(94% 0.045 25);color:oklch(32% 0.1 25);">帳號已停用，暫時無法開課。請聯絡店經理恢復帳號。</div>
+  </sc-if>
+
+  <section style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;flex-direction:column;gap:10px;opacity:{{ formOpacity }};">
+    <h2 style="margin:0;font-size:17px;">Step 1・開課</h2>
+    <div class="field"><label style="font-size:12px;color:var(--color-neutral-500);">課程名稱</label><input class="input" value="{{ title }}" onChange="{{ onTitleChange }}" disabled="{{ disabled }}" placeholder="早晨重量訓練"></input></div>
+    <div class="field"><label style="font-size:12px;color:var(--color-neutral-500);">開始時間</label><input class="input" type="datetime-local" value="{{ start }}" onChange="{{ onStartChange }}" disabled="{{ disabled }}"></input></div>
+    <div style="display:flex;gap:10px;">
+      <div class="field" style="flex:1;"><label style="font-size:12px;color:var(--color-neutral-500);">時長(分)</label><input class="input" type="number" value="{{ duration }}" onChange="{{ onDurationChange }}" disabled="{{ disabled }}"></input></div>
+      <div class="field" style="flex:1;"><label style="font-size:12px;color:var(--color-neutral-500);">容量</label><input class="input" type="number" value="{{ capacity }}" onChange="{{ onCapacityChange }}" disabled="{{ disabled }}"></input></div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <div class="field" style="flex:1;"><label style="font-size:12px;color:var(--color-neutral-500);">分店</label><input class="input" value="信義店" disabled="{{ true }}"></input></div>
+      <div class="field" style="flex:1;"><label style="font-size:12px;color:var(--color-neutral-500);">教練</label><input class="input" value="陳建豪" disabled="{{ true }}"></input></div>
+    </div>
+    <button class="btn btn-primary" onClick="{{ createCourse }}" disabled="{{ disabled }}" style="align-self:flex-start;">開課</button>
+    <sc-if value="{{ createdMsg }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size:13px;color:var(--color-accent-700);">{{ createdMsg }}</div>
+    </sc-if>
+  </section>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { title: '', start: '', duration: 60, capacity: 12, accountDisabled: false, createdMsg: '' };
+
+  renderVals() {
+    const s = this.state;
+    return {
+      title: s.title, start: s.start, duration: s.duration, capacity: s.capacity,
+      onTitleChange: e => this.setState({ title: e.target.value }),
+      onStartChange: e => this.setState({ start: e.target.value }),
+      onDurationChange: e => this.setState({ duration: e.target.value }),
+      onCapacityChange: e => this.setState({ capacity: e.target.value }),
+      enabled: !s.accountDisabled,
+      disabled: s.accountDisabled,
+      setEnabled: () => this.setState({ accountDisabled: false }),
+      setDisabled: () => this.setState({ accountDisabled: true }),
+      formOpacity: s.accountDisabled ? 0.6 : 1,
+      createCourse: () => {
+        if (s.accountDisabled || !s.title) return;
+        this.setState({ createdMsg: `已開課：${s.title}`, title: '', start: '' });
+      },
+      createdMsg: s.createdMsg,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

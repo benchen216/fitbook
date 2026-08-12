@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/styles.css">
+  <script src="_ds/broadsheet-d1553512-e3b6-4d1d-9a99-c7008d70f65b/_ds_bundle.js"></script>
+  <style>
+    body{margin:0;background:var(--color-bg);}
+    ::selection{background:var(--color-accent-200);}
+  </style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:var(--space-8) var(--space-4);box-sizing:border-box;font-family:var(--font-body);color:var(--color-text);">
+  <div style="width:100%;max-width:768px;display:flex;flex-direction:column;gap:var(--space-8);">
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-2);text-align:center;">
+      <div style="font-family:var(--font-heading);font-size:40px;font-weight:600;letter-spacing:-0.01em;">
+        <span style="color:var(--color-neutral-800);">Fit</span><span style="color:var(--color-accent-700);">Book</span>
+      </div>
+      <div style="font-size:16px;color:var(--color-neutral-700);">連鎖健身房會籍與課程預約系統</div>
+      <div style="font-size:13px;color:var(--color-neutral-500);max-width:480px;">請選擇要登入的身分；登入後可隨時從頂欄登出回到這一頁。</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-3);">
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:var(--space-2);">
+        <sc-for list="{{ roles }}" as="r" hint-placeholder-count="5">
+          <button onClick="{{ r.select }}" style="{{ r.pillStyle }}" style-hover="{{ r.pillHoverStyle }}">{{ r.label }}</button>
+        </sc-for>
+      </div>
+      <div style="font-size:14px;color:var(--color-neutral-600);text-align:center;min-height:20px;">{{ activeDescription }}</div>
+    </div>
+
+    <div style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-6);">
+
+      <sc-if value="{{ isMember }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:var(--space-4);">
+          <input class="input" placeholder="搜尋姓名或手機" value="{{ search }}" onChange="{{ onSearchChange }}" style="max-width:320px;" />
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--space-3);">
+            <sc-for list="{{ filteredMembers }}" as="m" hint-placeholder-count="4">
+              <div class="card" onClick="{{ m.select }}" style="cursor:pointer;padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-1);border-color:{{ m.borderColor }};background:{{ m.bg }};" style-hover="{{ memberHoverStyle }}">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:var(--space-2);">
+                  <span style="font-family:var(--font-heading);font-size:17px;font-weight:600;">{{ m.name }}</span>
+                  <span class="tag {{ m.tagClass }}">{{ m.badge }}</span>
+                </div>
+                <span style="font-size:13px;color:var(--color-neutral-600);">{{ m.phone }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ noMembers }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:14px;color:var(--color-neutral-500);padding:var(--space-4) 0;text-align:center;">找不到符合的會員</div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isStaff }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--space-3);">
+          <sc-for list="{{ staffList }}" as="s" hint-placeholder-count="4">
+            <div class="card" onClick="{{ s.select }}" style="cursor:pointer;padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-1);border-color:{{ s.borderColor }};background:{{ s.bg }};" style-hover="{{ memberHoverStyle }}">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:var(--space-2);">
+                <span style="font-family:var(--font-heading);font-size:17px;font-weight:600;">{{ s.name }}</span>
+                <span class="tag tag-neutral">{{ s.status }}</span>
+              </div>
+              <span style="font-size:13px;color:var(--color-neutral-600);">{{ s.roleBranch }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isGuest }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-4);text-align:center;padding:var(--space-4) 0;">
+          <p style="max-width:440px;font-size:15px;line-height:1.6;color:var(--color-neutral-700);margin:0;">
+            以訪客身分瀏覽公開頁面，例如門店介紹與課程資訊。訪客模式不會保留任何個人資料，也無法查看會籍或預約課程。
+          </p>
+          <button class="btn btn-primary" onClick="{{ selectGuest }}">不登入進站</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasSelection }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px solid var(--color-neutral-200);font-size:13px;color:var(--color-accent-700);">{{ selectionText }}</div>
+      </sc-if>
+
+    </div>
+
+    <div style="background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onClick="{{ toggleDemo }}">
+        <div style="display:flex;align-items:center;gap:var(--space-2);">
+          <span style="font-size:13px;font-weight:600;color:var(--color-neutral-600);">示範設定</span>
+          <sc-if value="{{ isShifted }}" hint-placeholder-val="{{ false }}">
+            <span class="tag" style="background:var(--color-accent-2-100);color:var(--color-accent-2-800);border-color:var(--color-accent-2-200);">模擬時間：{{ shiftLabel }}</span>
+          </sc-if>
+        </div>
+        <span style="font-size:13px;color:var(--color-neutral-500);">{{ demoToggleLabel }}</span>
+      </div>
+
+      <sc-if value="{{ demoOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:var(--space-3);margin-top:var(--space-4);">
+          <div style="display:flex;flex-direction:column;gap:var(--space-2);">
+            <span style="font-size:12px;color:var(--color-neutral-500);">模擬時間</span>
+            <div style="display:flex;flex-wrap:wrap;gap:var(--space-2);">
+              <sc-for list="{{ shiftOptions }}" as="opt" hint-placeholder-count="4">
+                <button onClick="{{ opt.select }}" style="{{ opt.style }}">{{ opt.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-3);">
+            <button class="btn btn-secondary" onClick="{{ resetData }}">重置示範資料</button>
+            <label style="display:flex;align-items:center;gap:var(--space-2);font-size:13px;color:var(--color-neutral-600);cursor:pointer;">
+              <input type="checkbox" checked="{{ flowOverview }}" onChange="{{ toggleFlowOverview }}" />
+              顯示流程總覽
+            </label>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    role: 'MEMBER',
+    search: '',
+    demoOpen: false,
+    shiftHours: 0,
+    flowOverview: false,
+    selection: null,
+  };
+
+  roleDefs = [
+    { id: 'MEMBER', label: '會員', desc: '檢視個人會籍、預約課程與查詢點數' },
+    { id: 'FRONT_DESK', label: '櫃檯人員', desc: '櫃檯報到、會籍異動與現場銷售' },
+    { id: 'STORE_MANAGER', label: '店經理', desc: '查看門店營運數據與人員管理' },
+    { id: 'COACH', label: '教練', desc: '管理課程班表與學員出席' },
+    { id: 'GUEST', label: '未登入', desc: '以訪客身分瀏覽公開頁面，不會保留任何資料' },
+  ];
+
+  members = [
+    { name: '陳怡君', phone: '0912-345-678', badge: '生效中', active: true },
+    { name: '林志強', phone: '0923-456-789', badge: '生效中', active: true },
+    { name: '黃美玲', phone: '0934-567-890', badge: '已到期', active: false },
+    { name: '王建宏', phone: '0945-678-901', badge: '生效中', active: true },
+    { name: '張淑芬', phone: '0956-789-012', badge: '無會籍', active: false },
+    { name: '李冠廷', phone: '0967-890-123', badge: '生效中', active: true },
+  ];
+
+  staffByRole = {
+    FRONT_DESK: [
+      { name: '吳佳蓉', roleBranch: '櫃檯人員｜信義店', status: '在職' },
+      { name: '鄭雅婷', roleBranch: '櫃檯人員｜大安店', status: '在職' },
+      { name: '許家瑋', roleBranch: '櫃檯人員｜板橋店', status: '在職' },
+    ],
+    STORE_MANAGER: [
+      { name: '蔡宗翰', roleBranch: '店經理｜信義店', status: '在職' },
+      { name: '曾淑惠', roleBranch: '店經理｜大安店', status: '在職' },
+    ],
+    COACH: [
+      { name: '游承恩', roleBranch: '教練｜信義店', status: '在職' },
+      { name: '賴思婷', roleBranch: '教練｜大安店', status: '在職' },
+      { name: '洪柏毅', roleBranch: '教練｜板橋店', status: '在職' },
+      { name: '簡佩瑜', roleBranch: '教練｜大安店', status: '休假' },
+    ],
+  };
+
+  shiftDefs = [
+    { hours: -24, label: '−1 天' },
+    { hours: 0, label: '現在' },
+    { hours: 24, label: '+1 天' },
+    { hours: 168, label: '+7 天' },
+  ];
+
+  pillBaseStyle(active) {
+    return active
+      ? 'padding:8px 18px;border-radius:999px;border:1px solid var(--color-accent-600);background:var(--color-accent-600);color:#fff;font-size:14px;font-family:var(--font-body);cursor:pointer;'
+      : 'padding:8px 18px;border-radius:999px;border:1px solid var(--color-neutral-300);background:var(--color-neutral-50);color:var(--color-neutral-700);font-size:14px;font-family:var(--font-body);cursor:pointer;';
+  }
+
+  formatShift(hours) {
+    if (hours === 0) return '現在';
+    const days = hours / 24;
+    return days > 0 ? `+${days} 天` : `${days} 天`;
+  }
+
+  renderVals() {
+    const { role, search, demoOpen, shiftHours, flowOverview, selection } = this.state;
+
+    const roles = this.roleDefs.map(r => ({
+      label: r.label,
+      pillStyle: this.pillBaseStyle(r.id === role),
+      pillHoverStyle: r.id === role
+        ? 'background:var(--color-accent-700);border-color:var(--color-accent-700);'
+        : 'background:var(--color-accent-100);border-color:var(--color-accent-300);color:var(--color-accent-800);',
+      select: () => this.setState({ role: r.id, selection: null }),
+    }));
+
+    const activeDef = this.roleDefs.find(r => r.id === role);
+    const q = search.trim().toLowerCase();
+    const filteredMembers = this.members
+      .filter(m => !q || m.name.toLowerCase().includes(q) || m.phone.includes(q))
+      .map(m => ({
+        name: m.name,
+        phone: m.phone,
+        badge: m.badge,
+        tagClass: m.active ? 'tag-accent' : 'tag-neutral',
+        borderColor: selection && selection.name === m.name ? 'var(--color-accent-600)' : 'var(--color-neutral-200)',
+        bg: selection && selection.name === m.name ? 'var(--color-accent-100)' : 'var(--color-neutral-50)',
+        select: () => this.setState({ selection: { name: m.name, desc: '會員' } }),
+      }));
+
+    const staffList = (this.staffByRole[role] || []).map(s => ({
+      name: s.name,
+      roleBranch: s.roleBranch,
+      status: s.status,
+      borderColor: selection && selection.name === s.name ? 'var(--color-accent-600)' : 'var(--color-neutral-200)',
+      bg: selection && selection.name === s.name ? 'var(--color-accent-100)' : 'var(--color-neutral-50)',
+      select: () => this.setState({ selection: { name: s.name, desc: s.roleBranch } }),
+    }));
+
+    const shiftOptions = this.shiftDefs.map(d => ({
+      label: d.label,
+      style: d.hours === shiftHours
+        ? 'padding:6px 14px;border-radius:999px;border:1px solid var(--color-accent-2-600);background:var(--color-accent-2-600);color:#fff;font-size:13px;font-family:var(--font-body);cursor:pointer;'
+        : 'padding:6px 14px;border-radius:999px;border:1px solid var(--color-neutral-300);background:var(--color-neutral-50);color:var(--color-neutral-700);font-size:13px;font-family:var(--font-body);cursor:pointer;',
+      select: () => this.setState({ shiftHours: d.hours }),
+    }));
+
+    return {
+      roles,
+      activeDescription: activeDef ? activeDef.desc : '',
+      isMember: role === 'MEMBER',
+      isStaff: role === 'FRONT_DESK' || role === 'STORE_MANAGER' || role === 'COACH',
+      isGuest: role === 'GUEST',
+      search,
+      onSearchChange: e => this.setState({ search: e.target.value, selection: null }),
+      filteredMembers,
+      noMembers: role === 'MEMBER' && filteredMembers.length === 0,
+      staffList,
+      memberHoverStyle: 'border-color:var(--color-accent-500);background:var(--color-accent-100);',
+      selectGuest: () => this.setState({ selection: { name: '訪客', desc: '未登入' } }),
+      hasSelection: !!selection,
+      selectionText: selection ? `已選擇：${selection.name}（${selection.desc}）— 登入中…（示範用，尚未串接）` : '',
+      demoOpen,
+      demoToggleLabel: demoOpen ? '收合 ▲' : '展開 ▼',
+      toggleDemo: () => this.setState({ demoOpen: !demoOpen }),
+      isShifted: shiftHours !== 0,
+      shiftLabel: this.formatShift(shiftHours),
+      shiftOptions,
+      resetData: () => this.setState({ shiftHours: 0, flowOverview: false, search: '', selection: null }),
+      flowOverview,
+      toggleFlowOverview: () => this.setState({ flowOverview: !flowOverview }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
