@@ -47,7 +47,7 @@ use a real `<table>` or your own data-grid component if you prefer, matching the
 
 | Route | File | Role / screen | Nav label |
 | --- | --- | --- | --- |
-| `/` | `pages/LoginRolePicker.jsx` | Login / role picker | — |
+| `/` | `pages/Login.jsx` | Login (account + password) | — |
 | `/guest` | `pages/GuestEmptyState.jsx` | Guest | 未登入 |
 | `/member/membership` | `pages/MemberMyMembership.jsx` | Member | 我的會籍 |
 | `/member/courses` | `pages/MemberCourseList.jsx` | Member | 課程列表 |
@@ -71,8 +71,9 @@ right chip and nav pills — see any page file for the call.
   once real data drives these states.
 - Book/cancel/freeze/unfreeze/check-in/open-class/reschedule actions are wired to local
   `useState` for demonstration; replace with real API calls.
-- `App.jsx`'s routing is illustrative — there's no auth guard. `LoginRolePicker` calls
-  `onLogin({role, name, desc})` on selection; `App.jsx` wires that to `navigate()` to each
+- `App.jsx`'s routing is illustrative — there's no auth guard. `Login` checks the
+  account/password pair against its in-page demo account table (password `fitbook123`),
+  then calls `onLogin({role, name, desc})`; `App.jsx` wires that to `navigate()` to each
   role's first screen. Replace with real auth once it exists.
 
 ## Design Tokens
