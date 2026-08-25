@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 
-import LoginRolePicker from "./pages/LoginRolePicker";
+import Login from "./pages/Login";
 import GuestEmptyState from "./pages/GuestEmptyState";
 import MemberMyMembership from "./pages/MemberMyMembership";
 import MemberCourseList from "./pages/MemberCourseList";
@@ -24,11 +24,11 @@ const DEST_FOR_ROLE = {
 };
 
 // Route map is illustrative only — swap for the target app's real router/auth guards.
-// LoginRolePicker's onLogin just routes to each role's first screen; there's no real
-// auth check here.
+// Login's onLogin just routes to each role's first screen; credentials are checked
+// against the in-page demo account table, not a real auth backend.
 function LoginRoute() {
   const navigate = useNavigate();
-  return <LoginRolePicker onLogin={({ role }) => navigate(DEST_FOR_ROLE[role])} />;
+  return <Login onLogin={({ role }) => navigate(DEST_FOR_ROLE[role])} />;
 }
 
 export default function App() {
